@@ -48,14 +48,16 @@ function build_wasm() {
     extra_options=""
     if [[ "${build_mode}" = "debug" ]]; then
         extra_options=""
-        # -g3 -gsource-map --source-map-base "http://localhost:8001/wasm-all/try/first_proj/embind_interop/" \
+        # extra_options="-g3 -gsource-map --source-map-base \"http://localhost:8001/wasm-all/webp-wasm/out/\""
     else
         extra_options="-O3"
     fi
 
-    emcc -o "${output_dir}/webp_wasm.html" \
+    # EMCC_DEBUG=2
+    EMCC_DEBUG=2 emcc -o "${output_dir}/webp_wasm.html" \
         --shell-file "${proj_dir}/test/webp_wasm.tpl.html" \
-        --post-js "${proj_dir}/src/webp_wasm.js" \
+        --pre-js "${proj_dir}/src/webp_wasm_pre.js" \
+        --post-js "${proj_dir}/src/webp_wasm_post.js" \
         ${extra_options} \
         -s"EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'getValue', 'setValue', 'stringToUTF8', 'UTF8ToString']" \
         -s"EXPORTED_FUNCTIONS=['_free', '_malloc']" \
