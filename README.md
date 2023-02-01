@@ -1,9 +1,13 @@
 # webp-wasm
 
+Call libwebp in browser/webview to encode animated webp.
+
 ## Install
-```shell
-sh build.sh install
-```
+1. Install emcc.
+2. Install this project:
+    ```shell
+    sh build.sh install
+    ```
 
 ## Build
 ```shell
