@@ -47,14 +47,12 @@ function build_wasm() {
 
     extra_options=""
     if [[ "${build_mode}" = "debug" ]]; then
-        extra_options=""
-        # extra_options="-g3 -gsource-map --source-map-base \"http://localhost:8001/wasm-all/webp-wasm/out/\""
+        extra_options="-g"
     else
         extra_options="-O3"
     fi
 
-    # EMCC_DEBUG=2
-    EMCC_DEBUG=2 emcc -o "${output_dir}/webp_wasm.html" \
+    emcc -o "${output_dir}/webp_wasm.html" \
         --shell-file "${proj_dir}/test/webp_wasm.tpl.html" \
         --pre-js "${proj_dir}/src/webp_wasm_pre.js" \
         --post-js "${proj_dir}/src/webp_wasm_post.js" \
@@ -65,8 +63,9 @@ function build_wasm() {
         -s"MODULARIZE" \
         -s"EXPORT_NAME=webpWASM" \
         -I"${libweb_dir}" \
-        "${proj_dir}/src/webp_wasm.c" \
-        "${libweb_dir}/src/"**/*.c
+        "${libweb_dir}/sharpyuv"/*.c \
+        "${libweb_dir}/src"/**/*.c \
+        "${proj_dir}/src/webp_wasm.c"
 }
 
 check_build_mode

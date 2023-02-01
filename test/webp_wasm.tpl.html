@@ -11,21 +11,78 @@
             }
             body {
                 background-color: rgb(196, 212, 232);
+                padding: 5px;
             }
-            .animation-frames-container {
+            .source-container {
                 border: 3px solid #000;
+                padding: 5px;
             }
             #animation-frames-test {
                 width: 500px;
                 height: 400px;
             }
+            .detect-jank-gif {
+                width: 100px;
+            }
+            .controller-area {
+                margin-top: 10px;
+            }
+            #jank_ball_container {
+                position: relative;
+                height: 50px;
+                width: 350px;
+            }
+            #jank_ball {
+                position: absolute;
+                top: 0;
+                padding: 0;
+                margin: 0;
+                width: 30px;
+                height: 30px;
+                background-color: green;
+                border-radius: 15px;
+            }
+            .jank-area {
+                border: 1px solid #aaa;
+                display: flex;
+                padding: 5px;
+                margin-top: 10px;
+            }
+            .jank-area-item {
+                border: 1px solid #aaa;
+                padding: 5px;
+            }
+            .result-area {
+                margin-top: 10px;
+            }
         </style>
     </head>
     <body>
 
-        <div class="animation-frames-container">
+        <div class="source-container">
             Test source png frames: <br/>
             <canvas id="animation-frames-test"></canvas>
+        </div>
+
+        <div class="jank-area">
+            <div class="jank-area-item">
+                A animated DOM show whether there is jank: <br>
+                <div id="jank_ball_container"><div id="jank_ball"></div></div>
+            </div>
+            <div class="jank-area-item">
+                A gif show whether there is jank: <br>
+                <img class="detect-jank-gif" src="../test/assets/jank.gif"/>
+            </div>
+        </div>
+
+        <div class="controller-area">
+            <button id="convert_to_awebp_in_js_thread">convert to awebp in JS thread</button>
+            <button id="convert_to_awebp_in_web_worker">convert to awebp in Web Worker</button>
+        </div>
+
+        <div class="result-area">
+            <div id="result_info"></div>
+            <div id="result_image"></div>
         </div>
 
         <script type='text/javascript'>
@@ -33,5 +90,6 @@
         {{{ SCRIPT }}}
 
         <script async src="../test/webp_wasm.test.js"></script>
+
     </body>
 </html>

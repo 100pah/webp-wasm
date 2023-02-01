@@ -19,7 +19,7 @@
     var nativeAPI = Module.nativeAPI = {};
 
     nativeAPI.libwebpVersion = function () {
-        return Module.ccall('libwebp_version', 'number', []);
+        return Module['_libwebp_version']();
     };
 
     /**
@@ -39,27 +39,20 @@
         /**
          * @private
          */
-        this._bufPtrList = Module.HEAPU8.subarray(
-            this._bufPtrListPtr, this._bufPtrListPtr + bufferListByteSize
-        );
-
-        /**
-         * @private
-         */
-        this._bufViewList = [];
+        this._bufViewList = new Array(bufferListSize);
 
         for (var i = 0; i < bufferListSize; i++) {
             var bufferPtr = allocWithThrow(bufferByteSize);
-            this._bufPtrList[i] = bufferPtr;
+            Module.setValue(this._bufPtrListPtr + i * PTR_BTYE_LENGTH, bufferPtr, PTR_IR_TYPE);
             this._bufViewList[i] = Module.HEAPU8.subarray(bufferPtr, bufferPtr + bufferByteSize);
         }
     }
 
     BufferListWrap.prototype.dispose = function () {
-        for (var i = 0; i < this._bufPtrList.length; i++) {
-            Module._free(this._bufPtrList[i]);
+        for (var i = 0, len = this.size(); i < len; i++) {
+            var bufPtr = Module.getValue(this._bufPtrListPtr + i * PTR_BTYE_LENGTH, PTR_IR_TYPE);
+            Module._free(bufPtr);
         }
-        this._bufPtrList = null;
 
         Module._free(this._bufPtrListPtr);
         this._bufPtrListPtr = null;
@@ -91,64 +84,36 @@
         return new BufferListWrap(bufferListSize, bufferByteSize);
     };
 
-    // nativeAPI.createBufferList2 = function (bufferListSize, bufferByteSize) {
-    //     var outBufferPtrListPtr = Module._malloc(PTR_BTYE_LENGTH);
-
-    //     if (Module.ccall(
-    //         'create_buffer_list',
-    //         'number',
-    //         ['pointer', 'number', 'number'],
-    //         [outBufferPtrListPtr, bufferListSize, bufferByteSize]
-    //     ) !== WEBP_WASM_OK) {
-    //         throw new Error('Create buffer failed.');
-    //     }
-
-    //     var bufferPtrListPtr = Module.getValue(outBufferPtrListPtr, PTR_IR_TYPE);
-
-    //     var bufferViewList = [];
-    //     for (var i = 0; i < bufferListSize; i++) {
-    //         var bufferPtr = Module.getValue(bufferPtrListPtr + i * PTR_BTYE_LENGTH, PTR_IR_TYPE);
-    //         var bufferView = Module.HEAPU8.subarray(bufferPtr, bufferPtr + bufferByteSize);
-    //         bufferViewList.push(bufferView);
-    //     }
-
-    //     Module._free(outBufferPtrListPtr);
-
-    //     return bufferViewList;
-    // };
-
     /**
      * @param {BufferListWrap} bufferListWrap
      * @param {number} width
      * @param {number} height
+     * @param {number} frameDurationMs duration of each frame, in ms
      * @param {number} quality 0~100
      * @return {string} animated-webp dataURL
      */
     nativeAPI.encodeAnimation = function (
-        bufferListWrap, width, height, quality
+        bufferListWrap,
+        width,
+        height,
+        frameDurationMs,
+        quality
     ) {
         var outBufferPtrPtr = Module._malloc(PTR_BTYE_LENGTH);
         var outBufferByteSizePtr = Module._malloc(PTR_BTYE_LENGTH);
 
-        if (Module.ccall(
-            'encode_animation',
-            'number',
-            ['pointer', 'pointer', 'pointer', 'number', 'number', 'number', 'number'],
-            [
-                outBufferPtrPtr,
-                outBufferByteSizePtr,
-                bufferListWrap.getBufferPtrListPtr(),
-                bufferListWrap.size(),
-                width,
-                height,
-                quality
-            ]
+        if (Module['_encode_animation'](
+            outBufferPtrPtr,
+            outBufferByteSizePtr,
+            bufferListWrap.getBufferPtrListPtr(),
+            bufferListWrap.size(),
+            width,
+            height,
+            frameDurationMs,
+            quality
         ) !== WEBP_WASM_OK) {
             throw new Error('encode animation failed');
         }
-
-        console.log('done encode animation ', outBufferPtrPtr);
-        console.log('done encode animation ', outBufferByteSizePtr);
 
         var bufferPtr = Module.getValue(outBufferPtrPtr, PTR_IR_TYPE);
         var bufferByteSize = Module.getValue(outBufferByteSizePtr, PTR_IR_TYPE);
@@ -177,7 +142,7 @@
         for (var i = 0; i < bufView.length; i++) {
             binary += String.fromCharCode(bufView[i]);
         }
-        return window.btoa(binary);
+        return btoa(binary);
     }
 
 })();
