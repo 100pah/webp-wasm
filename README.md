@@ -7,13 +7,16 @@ sh build.sh install
 
 ## Build
 ```shell
+# dev build
 sh build.sh
+
+# release
+sh build.sh release
+
+# example build
+sh build.sh example
 ```
 
-## Release
-```shell
-sh build.sh release
-```
 
 ## Code style
 

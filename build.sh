@@ -7,24 +7,35 @@ red_color="\033[0;31m"
 cyan_color="\033[0;36m"
 green_color="\033[0;32m"
 reset_color="\033[0m"
-output_dir="${proj_dir}/out"
 third_party_dir="${proj_dir}/third_party"
+output_dir=""
 libwebp_dir="${third_party_dir}/libwebp"
 libwebp_git="https://github.com/webmproject/libwebp"
 libwebp_tag="v1.2.4"
+
+BUILD_MODE_OPTIONS=("debug" "install" "release" "example")
 build_mode=$1
 
 
-function check_build_mode() {
+function prepare_params() {
     if [[ -z "${build_mode}" ]]; then
         build_mode="debug"
-    elif [[ "${build_mode}" != "release" && "${build_mode}" != "install" ]]; then
-        echo "${red_color} Illegal build mode input: ${build_mode}! ${reset_color}. "
+    fi
+
+    if [[ ! " ${BUILD_MODE_OPTIONS[*]} " =~ " ${build_mode} " ]]; then
+        echo "${red_color}Illegal build mode input: ${build_mode}! ${reset_color}. "
         echo "Only support: debug, release, install."
         exit 1
     fi
 
     echo "${cyan_color}Build mode: ${build_mode} ${reset_color}"
+
+    if [[ "${build_mode}" = "example" ]]; then
+        output_dir="${proj_dir}/example"
+        mkdir -p "${output_dir}"
+    else
+        output_dir="${proj_dir}/out"
+    fi
 }
 
 function install_third_party() {
@@ -210,7 +221,7 @@ function build_wasm() {
         "${proj_dir}/src/webp_wasm.c"
 }
 
-check_build_mode
+prepare_params
 install_third_party
 build_wasm
 
