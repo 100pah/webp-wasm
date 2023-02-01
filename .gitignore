@@ -417,5 +417,6 @@ third_party/gn/
 ################
 ## This project
 ################
-out
+out/*.map
+out/*.ww.js
 third_party
