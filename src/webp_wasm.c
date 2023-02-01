@@ -6,15 +6,6 @@
 #include "src/webp/mux.h"
 
 
-/// [C vs Cpp]
-/// The size of generated wasm have a significant difference.
-/// e.g, only link libwebp, with emcc option -Oz,
-/// generated wasm from C: 6945k, wasm from Cpp: 144529k)
-/// So we use C rather than Cpp here.
-/// But the downside is that embind can not be used and we have to
-/// write lots of pointer operations
-
-
 typedef uint64_t PointerValue;
 
 /// return value of c functions in webp-wasm.
